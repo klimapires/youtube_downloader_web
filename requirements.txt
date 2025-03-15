@@ -1,0 +1,5 @@
+Flask==2.3.2
+flask-socketio-5.5.1
+eventlet-0.39.1
+yt-dlp==2024.03.10
+gunicorn==21.2.0
