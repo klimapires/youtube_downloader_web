@@ -30,7 +30,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           # Entrar no diretório do projeto
-          cd /home/ec2-user/youtube_downloader_web
+          cd /home/ec2-user/app
 
           # Parar e remover container antigo (se existir)
           docker stop flask_app || true
