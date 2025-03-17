@@ -1,10 +1,18 @@
-import yt_dlp
+from pytube import YouTube
+from tqdm import tqdm
 import os
-import logging
-from flask_socketio import emit
-from app import socketio
+import urllib.request
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Função para atualizar os cabeçalhos HTTP
+def update_headers():
+    opener = urllib.request.build_opener()
+    opener.addheaders = [
+        (
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        )
+    ]
+    urllib.request.install_opener(opener)
 
 class YouTubeDownloader:
     def __init__(self, url, output_path, quality):
@@ -12,33 +20,18 @@ class YouTubeDownloader:
         self.output_path = output_path
         self.quality = quality
 
-    def progress_hook(self, d):
-        """Função chamada pelo yt-dlp para mostrar progresso"""
-        if d['status'] == 'downloading':
-            percent = d['_percent_str'].replace('%', '').strip()
-            percent_value = int(float(percent))  # Converte "45.0%" para 45
-            logging.info(f"Progresso do download: {percent_value}%")  # Log no terminal
-            socketio.emit('progress', {'progress': percent_value}, broadcast=True)
-
     def download(self):
-        """Baixa um vídeo do YouTube"""
-        try:
-            ydl_opts = {
-                'format': f'bestvideo[height={self.quality}]+bestaudio/best',
-                'outtmpl': os.path.join(self.output_path, 'video.%(ext)s'),
-                'merge_output_format': 'mp4',
-                'noplaylist': True,  # Evita baixar playlists
-                'progress_hooks': [self.progress_hook],
-                'nocheckcertificate': True,
-                'no-cache-dir': True,
-                'retries': 3
-            }
-            logging.info(f"Iniciando download: {self.url} em {self.quality}")
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([self.url])
-            logging.info("Download finalizado com sucesso!")
-            return os.path.join(self.output_path, 'video.mp4')
+        # Atualiza os cabeçalhos HTTP antes de fazer o download
+        update_headers()
 
-        except Exception as e:
-            logging.error(f"Erro ao baixar vídeo: {str(e)}")
-            return None
+        yt = YouTube(self.url)
+        stream = yt.streams.filter(res=self.quality, file_extension='mp4').first()
+        if not stream:
+            raise ValueError(f"No stream found with quality {self.quality}")
+
+        total_size = stream.filesize
+        with tqdm(total=total_size, unit='B', unit_scale=True, desc="Downloading") as pbar:
+            stream.download(output_path=self.output_path, filename='temp_video.mp4')
+            pbar.update(total_size)
+
+        return os.path.join(self.output_path, 'temp_video.mp4')

@@ -1,8 +1,4 @@
-from app import app, socketio
-import eventlet
-from app.controllers.main_controller import main_controller
+from app import app
 
-app.register_blueprint(main_controller)
-
-if __name__ == '__main__':
-    socketio.run(app, debug=True, host="0.0.0.0", port=5000)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

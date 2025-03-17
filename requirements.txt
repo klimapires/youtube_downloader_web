@@ -1,5 +1,4 @@
 Flask==2.3.2
-flask-socketio-5.5.1
-eventlet-0.39.1
-yt-dlp==2024.03.10
-gunicorn==21.2.0
+pytube==15.0.0
+tqdm==4.66.1
+moviepy==1.0.3
