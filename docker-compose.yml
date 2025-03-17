@@ -1,10 +1,11 @@
 version: '3.8'
 
 services:
-  youtube_downloader_web:
+  youtube_downloader:
     build: .
     container_name: youtube_downloader_web
-    volumes:
-      - .:/app
     ports:
       - "5000:5000"
+    volumes:
+      - .:/app
+    restart: always

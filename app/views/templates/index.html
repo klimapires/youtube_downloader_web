@@ -1,53 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Downloader</title>
+    <title>Download de Vídeos - Blog de Serviços</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>YouTube Downloader</h1>
-        <form id="download-form" method="POST" enctype="multipart/form-data">
-            <label for="url">YouTube URL:</label>
-            <input type="text" id="url" name="url" required>
-            <label for="quality">Select Quality:</label>
+    <header>
+        <h1>Baixe vídeos do YouTube com qualidade!</h1>
+        <p>Nosso serviço permite baixar vídeos com diferentes resoluções de forma rápida e segura.</p>
+    </header>
+
+    <section id="download">
+        <h2>Insira o link do vídeo</h2>
+        <form id="download-form" method="POST">
+            <label for="url">URL do YouTube:</label>
+            <input type="text" id="url" name="url" placeholder="Cole o link aqui..." required>
+
+            <label for="quality">Escolha a Qualidade:</label>
             <select id="quality" name="quality" required>
                 <option value="144p">144p</option>
                 <option value="240p">240p</option>
                 <option value="360p">360p</option>
                 <option value="720p">720p</option>
             </select>
-            <button type="submit">Download</button>
+
+            <button type="submit">Baixar Vídeo</button>
         </form>
+
         <div id="progress-container" style="display: none;">
-            <p>Progresso:</p>
+            <p>Progresso do Download:</p>
             <progress id="progress-bar" value="0" max="100"></progress>
         </div>
-        {% if error %}
-            <p class="error">{{ error }}</p>
-        {% endif %}
-    </div>
+    </section>
+
+    <section id="about">
+        <h2>Sobre o nosso serviço</h2>
+        <p>Oferecemos uma maneira simples e eficiente para baixar vídeos do YouTube em diferentes formatos e qualidades.</p>
+        <p>Nosso sistema é seguro e confiável, garantindo que seus downloads sejam rápidos e fáceis.</p>
+    </section>
+
+    <footer>
+        <p>© 2025 - Serviço de Download de Vídeos | Desenvolvido com ❤️</p>
+    </footer>
 
     <script>
+        var socket = io.connect("http://127.0.0.1:5000", { transports: ["websocket", "polling"] });
+    
+        socket.on("progress", function(data) {
+            console.log("Progresso recebido:", data.progress);
+            let progressBar = document.getElementById("progress-bar");
+            let progressContainer = document.getElementById("progress-container");
+            let progressText = document.getElementById("progress-text");
+    
+            if (data.progress >= 0 && data.progress <= 100) {
+                progressContainer.style.display = 'block';
+                progressBar.value = data.progress;
+                progressText.innerText = data.progress + "%"; // Atualiza o texto da barra
+            }
+    
+            if (data.progress >= 100) {
+                alert("Download concluído!");
+            }
+        });
+    
         document.getElementById('download-form').addEventListener('submit', function(event) {
             event.preventDefault();
-            document.getElementById('progress-container').style.display = 'block';
-
+            document.getElementById("progress-container").style.display = 'block';
+    
             fetch('/download', {
                 method: 'POST',
                 body: new FormData(this),
-                headers: {
-                    'Accept': 'application/json'
-                }
+                headers: { 'Accept': 'application/json' }
             })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     window.location.href = data.download_url;

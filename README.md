@@ -1,6 +1,6 @@
 # YouTube Downloader Web
 
-Uma aplicação web em Python (Flask) para baixar vídeos do YouTube na qualidade máxima. A aplicação permite escolher a qualidade do vídeo, selecionar a pasta de destino e exibe uma barra de progresso durante o download.
+Uma aplicação web em Python (Flask) para baixar vídeos do YouTube em baixa e alta qualidade. A aplicação permite escolher a qualidade do vídeo, selecionar a pasta de destino e exibe uma barra de progresso durante o download.
 
 ---
 
