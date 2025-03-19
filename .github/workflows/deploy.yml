@@ -9,17 +9,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-  - name: Testar conexão SSH
-    uses: appleboy/ssh-action@v0.1.6
-    with:
-      host: ${{ secrets.EC2_HOST }}
-      username: ec2-user
-      key: ${{ secrets.EC2_SSH_KEY }}
-      script: |
-        echo "Conexão SSH bem-sucedida!"
-      steps:
-      - name: Checkout do código
-        uses: actions/checkout@v3
+    - name: Testar conexão SSH
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          echo "Conexão SSH bem-sucedida!"
+        steps:
+        - name: Checkout do código
+          uses: actions/checkout@v3
 
     - name: Copiar arquivos via SSH
       uses: appleboy/scp-action@v0.1.4
