@@ -9,37 +9,38 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    - name: Testar conexão SSH
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ec2-user
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          echo "Conexão SSH bem-sucedida!"
-        steps:
-        - name: Checkout do código
-          uses: actions/checkout@v3
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
 
-    - name: Copiar arquivos via SSH
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ec2-user
-        key: ${{ secrets.EC2_SSH_KEY }}
-        source: "."
-        target: "/home/ec2-user/youtube_downloader_web"
+      - name: Testar conexão SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Conexão SSH bem-sucedida!"
 
-    - name: Conectar na EC2 e fazer deploy
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ec2-user
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          cd /home/ec2-user/youtube_downloader_web
-          docker stop youtube_downloader_web || true
-          docker rm youtube_downloader_web || true
-          docker rmi youtube_downloader_web || true
-          docker build -t youtube_downloader_web .
-          docker run -d -p 80:5000 --name youtube_downloader_web youtube_downloader_web
+      - name: Copiar arquivos via SSH
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "."
+          target: "/home/ec2-user/youtube_downloader_web"
+
+      - name: Conectar na EC2 e fazer deploy
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/youtube_downloader_web
+            docker stop youtube_downloader_web || true
+            docker rm youtube_downloader_web || true
+            docker rmi youtube_downloader_web || true
+            docker build -t youtube_downloader_web .
+            docker run -d -p 80:5000 --name youtube_downloader_web youtube_downloader_web
