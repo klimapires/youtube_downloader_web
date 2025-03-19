@@ -1,8 +1,17 @@
-FROM python:3.9-slim
+# Usar a imagem oficial do Python
+FROM python:3.11
 
+# Definir diretório de trabalho dentro do container
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar os arquivos do projeto para o container
 COPY . .
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "run:app"]
+# Instalar as dependências
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expor a porta 5000 para comunicação
+EXPOSE 5000
+
+# Definir o comando para rodar o Flask com Gunicorn
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]

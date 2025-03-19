@@ -3,7 +3,7 @@ name: Deploy no EC2
 on:
   push:
     branches:
-      - main  # O deploy acontece apenas na branch principal
+      - main  # O deploy acontece apenas quando há mudanças na branch principal
 
 jobs:
   deploy:
@@ -13,14 +13,14 @@ jobs:
     - name: Checkout do código
       uses: actions/checkout@v3
 
-    - name: Copiar arquivos para EC2 via SSH
+    - name: Copiar arquivos via SSH
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         source: "."
-        target: "/home/ec2-user/app"
+        target: "/home/ec2-user/youtube_downloader_web"
 
     - name: Conectar na EC2 e fazer deploy
       uses: appleboy/ssh-action@v0.1.6
@@ -29,18 +29,9 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          # Entrar no diretório do projeto
-          cd /home/ec2-user/app
-
-          # Parar e remover container antigo (se existir)
-          docker stop flask_app || true
-          docker rm flask_app || true
-
-          # Remover imagens antigas (opcional)
-          docker rmi flask_app || true
-
-          # Construir nova imagem Docker
-          docker build -t flask_app .
-
-          # Rodar o container mapeando porta 5000 para a 80
-          docker run -d -p 80:5000 --name flask_app flask_app
+          cd /home/ec2-user/youtube_downloader_web
+          docker stop youtube_downloader_web || true
+          docker rm youtube_downloader_web || true
+          docker rmi youtube_downloader_web || true
+          docker build -t youtube_downloader_web .
+          docker run -d -p 80:5000 --name youtube_downloader_web youtube_downloader_web
