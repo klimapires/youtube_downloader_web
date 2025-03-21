@@ -1,11 +1,16 @@
 import os
 import logging
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, render_template, request, jsonify, send_from_directory
 from app.models.downloader import YouTubeDownloader
+from app.utils.file_utils import save_last_directory, load_last_directory
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 main_controller = Blueprint('main_controller', __name__)
+
+@main_controller.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
 
 @main_controller.route('/download', methods=['POST'])
 def download():
