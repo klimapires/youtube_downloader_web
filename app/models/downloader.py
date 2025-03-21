@@ -3,6 +3,7 @@ import os
 import logging
 from flask_socketio import emit
 from app import socketio
+from yt_dlp import YoutubeDL
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -24,24 +25,23 @@ class YouTubeDownloader:
                 logging.error(f"Erro ao processar progresso: {str(e)}")
 
     def download(self):
-        """Baixa um vídeo do YouTube e emite eventos de progresso"""
-        try:
-            ydl_opts = {
-                'format': f'bestvideo[height={self.quality}]+bestaudio/best',
-                'outtmpl': os.path.join(self.output_path, 'video.%(ext)s'),
-                'merge_output_format': 'mp4',
-                'noplaylist': True,
-                'progress_hooks': [self.progress_hook],
-                'nocheckcertificate': True,
-                'no-cache-dir': True,
-                'retries': 3
-            }
-            logging.info(f"Iniciando download: {self.url} em {self.quality}")
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([self.url])
-            logging.info("Download finalizado com sucesso!")
-            return os.path.join(self.output_path, 'video.mp4')
-
-        except Exception as e:
-            logging.error(f"Erro ao baixar vídeo: {str(e)}")
+        if not self.output_path:
+            logging.error("Erro: O diretório de saída está indefinido.")
             return None
+
+        os.makedirs(self.output_path, exist_ok=True)  # Criar diretório se não existir
+
+        ydl_opts = {
+            'format': f'bestvideo[height={self.quality}]+bestaudio/best',
+            'outtmpl': os.path.join(self.output_path, '%(title)s.%(ext)s'),
+        }
+
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(self.url, download=True)
+            file_path = ydl.prepare_filename(info)
+
+            if not file_path or not os.path.exists(file_path):
+                logging.error("Erro: O arquivo não foi baixado corretamente.")
+                return None
+
+            return file_path  # Retorna o caminho completo do arquivo
