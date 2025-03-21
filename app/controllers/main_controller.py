@@ -1,8 +1,7 @@
 import os
 import logging
-from flask import Blueprint, render_template, request, jsonify, send_from_directory
+from flask import Blueprint, render_template, request, jsonify, send_file
 from app.models.downloader import YouTubeDownloader
-from app.utils.file_utils import save_last_directory, load_last_directory
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 

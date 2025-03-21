@@ -1,7 +1,9 @@
 import os
 import logging
-from app import socketio
+from flask_socketio import SocketIO
 from yt_dlp import YoutubeDL
+
+socketio = SocketIO(message_queue="redis://")  # Ajuste para comunicação com o Flask
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
