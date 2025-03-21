@@ -1,7 +1,5 @@
-import yt_dlp
 import os
 import logging
-from flask_socketio import emit
 from app import socketio
 from yt_dlp import YoutubeDL
 
