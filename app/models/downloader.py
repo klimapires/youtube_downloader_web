@@ -29,19 +29,40 @@ class YouTubeDownloader:
             logging.error("Erro: O diretório de saída está indefinido.")
             return None
 
-        os.makedirs(self.output_path, exist_ok=True)  # Criar diretório se não existir
+        os.makedirs(self.output_path, exist_ok=True)
+
+        # Configurar User-Agent para se parecer com um navegador
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
         ydl_opts = {
             'format': f'bestvideo[height={self.quality}]+bestaudio/best',
             'outtmpl': os.path.join(self.output_path, '%(title)s.%(ext)s'),
+            'noplaylist': True,  # Evita baixar playlists completas
+            'no-check-certificate': True,  # Evita erros de certificado SSL
+            'postprocessors': [{
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': 'mp4',
+            }],
+            'http_headers': {
+                'User-Agent': user_agent  # Adiciona o User-Agent para imitar um navegador
+            },
+            'sleep-requests': 1,  # Espera entre requisições para evitar bloqueios
+            'retries': 5,  # Tenta novamente se houver erro
+            'fragment-retries': 5,  # Retenta downloads de fragmentos de vídeos
+            'extractor-args': {'youtube': {'player-client': ['android', 'web']}}  # Tenta enganar o YouTube
         }
 
         with YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(self.url, download=True)
-            file_path = ydl.prepare_filename(info)
+            try:
+                info = ydl.extract_info(self.url, download=True)
+                file_path = ydl.prepare_filename(info)
 
-            if not file_path or not os.path.exists(file_path):
-                logging.error("Erro: O arquivo não foi baixado corretamente.")
+                if not file_path or not os.path.exists(file_path):
+                    logging.error("Erro: O arquivo não foi baixado corretamente.")
+                    return None
+
+                return file_path
+
+            except Exception as e:
+                logging.error(f"Erro ao baixar o vídeo: {e}")
                 return None
-
-            return file_path  # Retorna o caminho completo do arquivo
