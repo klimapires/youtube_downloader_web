@@ -35,19 +35,19 @@ class YouTubeDownloader:
         ydl_opts = {
             'format': f'bestvideo[height={self.quality}]+bestaudio/best',
             'outtmpl': os.path.join(self.output_path, '%(title)s.%(ext)s'),
-            'noplaylist': True,  # Evita baixar playlists completas
-            'no-check-certificate': True,  # Evita erros de certificado SSL
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': 'mp4',
-            }],
-            'http_headers': {
-                'User-Agent': user_agent  # Adiciona o User-Agent para imitar um navegador
+            'noplaylist': True,
+            'no-check-certificate': True,
+            'sleep-requests': 1,
+            'retries': 5,
+            'fragment-retries': 5,
+            'extractor-args': {
+                'youtube': {
+                    'player-client': ['android', 'tvhtml5', 'ios']  # Simula diferentes clientes
+                }
             },
-            'sleep-requests': 1,  # Espera entre requisições para evitar bloqueios
-            'retries': 5,  # Tenta novamente se houver erro
-            'fragment-retries': 5,  # Retenta downloads de fragmentos de vídeos
-            'extractor-args': {'youtube': {'player-client': ['android', 'web']}}  # Tenta enganar o YouTube
+            'http_headers': {
+                'User-Agent': "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+            }
         }
 
         with YoutubeDL(ydl_opts) as ydl:
